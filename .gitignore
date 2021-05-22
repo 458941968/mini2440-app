@@ -12,7 +12,6 @@
 *.mod.c
 *.deps/
 *.libs/
-Makefile
 
 # Precompiled Headers
 *.gch
