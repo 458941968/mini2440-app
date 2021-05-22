@@ -57,7 +57,7 @@ static struct fb_var_screeninfo var;
 static int *zoom_x_tab;
 static int *zoom_y_tab;
 
-extern int InitJoypadInput(void);
+extern int InitJoypadInput(const char* device);
 extern int GetJoypadInput(void);
 
 static int lcd_fb_display_px(WORD color, int x, int y)
@@ -232,7 +232,7 @@ int main( int argc, char **argv )
 	
 	int i;
 	
-	InitJoypadInput();
+	InitJoypadInput(argv[2]);
 
 	lcd_fb_init();
 
@@ -240,7 +240,7 @@ int main( int argc, char **argv )
 	make_zoom_tab();
 
 	/* If a rom name specified, start it */
-	if ( argc == 2 )
+	if ( argc > 2 )
 	{
 		start_application( argv[1] );
 	}

@@ -10,7 +10,7 @@
 
 
 typedef struct JoypadInput{
-	int (*DevInit)(void);
+	int (*DevInit)(const char*);
 	int (*DevExit)(void);
 	int (*GetJoypad)(void);
 	struct JoypadInput *ptNext;
@@ -53,10 +53,10 @@ static void *InputEventTreadFunction(void *pVoid)
 	}
 }
 
-static int RegisterJoypadInput(PT_JoypadInput ptJoypadInput)
+static int RegisterJoypadInput(PT_JoypadInput ptJoypadInput, const char* device)
 {
 	PT_JoypadInput tmp;
-	if(ptJoypadInput->DevInit())
+	if(ptJoypadInput->DevInit(device))
 	{
 		return -1;
 	}
@@ -84,7 +84,7 @@ static int joypadGet(void)
 	return read(joypad_fd, 0, 0);
 }
 
-static int joypadDevInit(void)
+static int joypadDevInit(const char* device)
 {
 	joypad_fd = open(JOYPAD_DEV, O_RDONLY);
 	if(-1 == joypad_fd)
@@ -263,12 +263,12 @@ static int USBjoypadGet(void)
 	return -1;
 }
 
-static int USBjoypadDevInit(void)
+static int USBjoypadDevInit(const char* device)
 {
-	USBjoypad_fd = open(USB_JS_DEV, O_RDONLY);
+	USBjoypad_fd = open(device, O_RDONLY);
 	if(-1 == USBjoypad_fd)
 	{
-		printf("%s dev not found \r\n", USB_JS_DEV);
+		printf("%s dev not found \r\n", device);
 		return -1;
 	}
 	return 0;
@@ -286,11 +286,11 @@ static T_JoypadInput usbJoypadInput = {
 	USBjoypadGet,
 };
 
-int InitJoypadInput(void)
+int InitJoypadInput(const char* device)
 {
 	int iErr = 0;
 	//iErr = RegisterJoypadInput(&joypadInput);
-	iErr = RegisterJoypadInput(&usbJoypadInput);
+	iErr = RegisterJoypadInput(&usbJoypadInput, device);
 	return iErr;
 }
 
