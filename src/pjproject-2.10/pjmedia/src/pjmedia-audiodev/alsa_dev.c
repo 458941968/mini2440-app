@@ -680,6 +680,7 @@ static pj_status_t open_playback (struct alsa_stream* stream,
     TRACE_((THIS_FILE, "open_playback: set clock rate: %d", rate));
     snd_pcm_hw_params_set_rate_near (stream->pb_pcm, params, &rate, NULL);
     TRACE_((THIS_FILE, "open_playback: clock rate set to: %d", rate));
+printf("hyq[%s:%d] alsa samples_per_frame=%d\n", __FUNCTION__, __LINE__, param->samples_per_frame);
 
     /* Set period size to samples_per_frame frames. */
     stream->pb_frames = (snd_pcm_uframes_t) param->samples_per_frame /
@@ -687,8 +688,10 @@ static pj_status_t open_playback (struct alsa_stream* stream,
     TRACE_((THIS_FILE, "open_playback: set period size: %d",
 	    stream->pb_frames));
     tmp_period_size = stream->pb_frames;
+printf("hyq[%s:%d] tmp_period_size=%d\n", __FUNCTION__, __LINE__, tmp_period_size);	
     snd_pcm_hw_params_set_period_size_near (stream->pb_pcm, params,
 					    &tmp_period_size, NULL);
+printf("hyq[%s:%d] tmp_period_size=%d\n", __FUNCTION__, __LINE__, tmp_period_size);							
     stream->pb_frames = tmp_period_size > stream->pb_frames ? tmp_period_size : 
                                                               stream->pb_frames;					    					    
     TRACE_((THIS_FILE, "open_playback: period size set to: %d",
@@ -704,6 +707,7 @@ static pj_status_t open_playback (struct alsa_stream* stream,
     stream->param.output_latency_ms = tmp_buf_size / (rate / 1000);
 
     /* Set our buffer */
+printf("hyq pb_frames=%d, channel=%d, bits_per_sample=%d\n", stream->pb_frames, param->channel_count, param->bits_per_sample);
     stream->pb_buf_size = stream->pb_frames * param->channel_count *
 			  (param->bits_per_sample/8);
     stream->pb_buf = (char*) pj_pool_alloc(stream->pool, stream->pb_buf_size);

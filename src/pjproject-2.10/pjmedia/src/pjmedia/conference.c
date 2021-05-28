@@ -1891,6 +1891,7 @@ static pj_status_t get_frame(pjmedia_port *this_port,
     TRACE_((THIS_FILE, "- clock -"));
 
     /* Check that correct size is specified. */
+//printf("hyq[%s:%d]  frame_size=%d, samples_per_frame=%d, bits_per_sample=%d\n", __FUNCTION__, __LINE__, frame->size, conf->samples_per_frame, conf->bits_per_sample);	
     pj_assert(frame->size == conf->samples_per_frame *
 			     conf->bits_per_sample / 8);
 
@@ -2228,8 +2229,8 @@ static pj_status_t put_frame(pjmedia_port *this_port,
     pj_status_t status;
 
     /* Check for correct size. */
-    PJ_ASSERT_RETURN( frame->size == conf->samples_per_frame *
-				     conf->bits_per_sample / 8,
+//printf("hyq[%s:%d] frame_size=%d, samples_per_frame=%d, bits_per_sample=%d\n", __FUNCTION__, __LINE__, frame->size, conf->samples_per_frame, conf->bits_per_sample);
+    PJ_ASSERT_RETURN( frame->size == ((conf->samples_per_frame * conf->bits_per_sample)>>3),
 		      PJMEDIA_ENCSAMPLESPFRAME);
 
     /* Check existance of delay_buf instance */
