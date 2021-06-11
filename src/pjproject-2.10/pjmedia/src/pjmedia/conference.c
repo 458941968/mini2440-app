@@ -37,7 +37,7 @@
 /* CONF_DEBUG enables detailed operation of the conference bridge.
  * Beware that it prints large amounts of logs (several lines per frame).
  */
-//#define CONF_DEBUG
+#define CONF_DEBUG	1
 #ifdef CONF_DEBUG
 #   include <stdio.h>
 #   define TRACE_(x)   PJ_LOG(5,x)
@@ -1602,6 +1602,7 @@ static pj_status_t read_port( pjmedia_conf *conf,
 	 * If port's clock_rate is different, resample.
 	 * Otherwise just copy.
 	 */
+	 printf("cport clock rate=%d, conf clock rate=%d\n", cport->clock_rate, conf->clock_rate);
 	if (cport->clock_rate != conf->clock_rate) {
 	    
 	    unsigned src_count;
@@ -1887,7 +1888,8 @@ static pj_status_t get_frame(pjmedia_port *this_port,
     pjmedia_frame_type speaker_frame_type = PJMEDIA_FRAME_TYPE_NONE;
     unsigned ci, cj, i, j;
     pj_int16_t *p_in;
-    
+    printf("[%s:%d]conf get_frame\n",  __FUNCTION__, __LINE__);
+
     TRACE_((THIS_FILE, "- clock -"));
 
     /* Check that correct size is specified. */
@@ -1927,7 +1929,7 @@ static pj_status_t get_frame(pjmedia_port *this_port,
     for (i=0, ci=0; i < conf->max_ports && ci < conf->port_cnt; ++i) {
 	struct conf_port *conf_port = conf->ports[i];
 	pj_int32_t level = 0;
-
+printf("[%s:%d]conf conf port i=%d\n",  __FUNCTION__, __LINE__, i);
 	/* Skip empty port. */
 	if (!conf_port)
 	    continue;
@@ -2134,7 +2136,7 @@ static pj_status_t get_frame(pjmedia_port *this_port,
 	    }
 	} /* loop the listeners of conf port */
     } /* loop of all conf ports */
-
+#if 0
     /* Time for all ports to transmit whetever they have in their
      * buffer. 
      */
@@ -2174,7 +2176,7 @@ static pj_status_t get_frame(pjmedia_port *this_port,
 	if (i == 0)
 	    speaker_frame_type = frm_type;
     }
-
+#endif
     /* Return sound playback frame. */
     if (conf->ports[0]->tx_level) {
 	TRACE_((THIS_FILE, "write to audio, count=%d", 

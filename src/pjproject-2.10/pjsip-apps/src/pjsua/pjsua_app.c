@@ -1381,6 +1381,8 @@ static pj_status_t app_init(void)
     if (app_cfg.on_config_init)
 	(*app_cfg.on_config_init)(&app_config);
 
+	app_config.log_cfg.decor |= PJ_LOG_HAS_THREAD_ID;
+
     /* Initialize pjsua */
     status = pjsua_init(&app_config.cfg, &app_config.log_cfg,
 			&app_config.media_cfg);

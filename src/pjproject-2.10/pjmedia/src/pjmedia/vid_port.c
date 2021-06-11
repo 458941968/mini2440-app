@@ -1357,7 +1357,7 @@ static pj_status_t vid_pasv_port_get_frame(struct pjmedia_port *this_port,
     struct vid_pasv_port *vpp = (struct vid_pasv_port*)this_port;
     pjmedia_vid_port *vp = vpp->vp;
     pj_status_t status = PJ_SUCCESS;
-
+    printf("[%s:%d]get_frame\n",  __FUNCTION__, __LINE__);
     if (vp->stream_role==ROLE_PASSIVE) {
         /* We are passive and the stream is passive.
          * The decoding counterpart is in vid_pasv_port_put_frame().

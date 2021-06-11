@@ -81,6 +81,7 @@ static pj_status_t null_put_frame(pjmedia_port *this_port,
 static pj_status_t null_get_frame(pjmedia_port *this_port, 
 				  pjmedia_frame *frame)
 {
+	    printf("[%s:%d]get_frame\n",  __FUNCTION__, __LINE__);
     frame->type = PJMEDIA_FRAME_TYPE_AUDIO;
     frame->size = PJMEDIA_PIA_AVG_FSZ(&this_port->info);
     frame->timestamp.u32.lo += PJMEDIA_PIA_SPF(&this_port->info);

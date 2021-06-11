@@ -729,7 +729,7 @@ PJ_DEF(pj_status_t) pjsua_reconfigure_logging(const pjsua_logging_config *cfg)
     pj_log_set_log_func( &log_writer );
 
     /* Set decor */
-    pj_log_set_decor(pjsua_var.log_cfg.decor);
+    pj_log_set_decor(pjsua_var.log_cfg.decor|PJ_LOG_HAS_THREAD_ID);
 
     /* Set log level */
     pj_log_set_level(pjsua_var.log_cfg.level);

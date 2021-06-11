@@ -163,7 +163,7 @@ static pj_status_t stereo_get_frame(pjmedia_port *this_port,
     const pjmedia_audio_format_detail *s_afd, *dn_afd;
     pjmedia_frame tmp_frame;
     pj_status_t status;
-
+printf("[%s:%d]stereo_get_frame\n",  __FUNCTION__, __LINE__);
     /* Return silence if we don't have downstream port */
     if (sport->dn_port == NULL) {
 	pj_bzero(frame->buf, frame->size);

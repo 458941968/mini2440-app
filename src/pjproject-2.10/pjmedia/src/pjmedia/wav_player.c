@@ -629,7 +629,7 @@ static pj_status_t file_get_frame(pjmedia_port *this_port,
     struct file_reader_port *fport = (struct file_reader_port*)this_port;
     pj_size_t frame_size;
     pj_status_t status = PJ_SUCCESS;
-
+    printf("[%s:%d]get_frame\n",  __FUNCTION__, __LINE__);
     pj_assert(fport->base.info.signature == SIGNATURE);
     pj_assert(frame->size <= fport->bufsize);
 

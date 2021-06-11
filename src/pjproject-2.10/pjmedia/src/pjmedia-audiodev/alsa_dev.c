@@ -47,7 +47,7 @@
 #define MAX_MIX_NAME_LEN                64 
 
 /* Set to 1 to enable tracing */
-#define ENABLE_TRACING			0
+#define ENABLE_TRACING			1
 
 #if ENABLE_TRACING
 #	define TRACE_(expr)		PJ_LOG(5,expr)
@@ -497,7 +497,23 @@ static int pb_thread_func (void *arg)
     char* buf 		       = stream->pb_buf;
     pj_timestamp tstamp;
     int result;
-
+    struct sched_param param;
+    pthread_t* thid;
+    thid = (pthread_t*) pj_thread_get_os_handle (pj_thread_this());
+    param.sched_priority = sched_get_priority_max (SCHED_RR);
+    PJ_LOG (5,(THIS_FILE, "ca_thread_func(%u): Set thread priority "
+		          "for audio capture thread.",
+		          (unsigned)syscall(SYS_gettid)));
+    result = pthread_setschedparam (*thid, SCHED_RR, &param);
+    if (result) {
+	if (result == EPERM)
+	    PJ_LOG (5,(THIS_FILE, "Unable to increase thread priority, "
+				  "root access needed."));
+	else
+	    PJ_LOG (5,(THIS_FILE, "Unable to increase thread priority, "
+				  "error: %d",
+				  result));
+    }
     pj_bzero (buf, size);
     tstamp.u64 = 0;
 
@@ -514,22 +530,23 @@ static int pb_thread_func (void *arg)
 	frame.size = size;
 	frame.timestamp.u64 = tstamp.u64;
 	frame.bit_info = 0;
-
+//PJ_LOG (4,(THIS_FILE, "[%s:%d]begin pb_cb",  __FUNCTION__, __LINE__));
 	result = stream->pb_cb (user_data, &frame);
+//PJ_LOG (4,(THIS_FILE, "[%s:%d]after pb_cb",  __FUNCTION__, __LINE__));
 	if (result != PJ_SUCCESS || stream->quit)
 	    break;
 
 	if (frame.type != PJMEDIA_FRAME_TYPE_AUDIO)
 	    pj_bzero (buf, size);
-
+//PJ_LOG (4,(THIS_FILE, "[%s:%d]begin pcm write",  __FUNCTION__, __LINE__));
 	result = snd_pcm_writei (pcm, buf, nframes);
+//PJ_LOG (4,(THIS_FILE, "[%s:%d]after pcm write",  __FUNCTION__, __LINE__));
 	if (result == -EPIPE) {
 	    PJ_LOG (4,(THIS_FILE, "pb_thread_func: underrun!"));
 	    snd_pcm_prepare (pcm);
 	} else if (result < 0) {
 	    PJ_LOG (4,(THIS_FILE, "pb_thread_func: error writing data!"));
 	}
-
 	tstamp.u64 += nframes;
     }
 
@@ -552,7 +569,7 @@ static int ca_thread_func (void *arg)
     int result;
     struct sched_param param;
     pthread_t* thid;
-
+#if 0
     thid = (pthread_t*) pj_thread_get_os_handle (pj_thread_this());
     param.sched_priority = sched_get_priority_max (SCHED_RR);
     PJ_LOG (5,(THIS_FILE, "ca_thread_func(%u): Set thread priority "
@@ -568,7 +585,7 @@ static int ca_thread_func (void *arg)
 				  "error: %d",
 				  result));
     }
-
+#endif
     pj_bzero (buf, size);
     tstamp.u64 = 0;
 
@@ -581,7 +598,9 @@ static int ca_thread_func (void *arg)
 	pjmedia_frame frame;
 
 	pj_bzero (buf, size);
+//PJ_LOG (4,(THIS_FILE, "[%s:%d]begin pcm read\n", __FUNCTION__, __LINE__));
 	result = snd_pcm_readi (pcm, buf, nframes);
+//PJ_LOG (4,(THIS_FILE, "[%s:%d]after pcm read\n", __FUNCTION__, __LINE__));
 	if (result == -EPIPE) {
 	    PJ_LOG (4,(THIS_FILE, "ca_thread_func: overrun!"));
 	    snd_pcm_prepare (pcm);
@@ -598,7 +617,7 @@ static int ca_thread_func (void *arg)
 	frame.timestamp.u64 = tstamp.u64;
 	frame.bit_info = 0;
 
-	result = stream->ca_cb (user_data, &frame);
+	result = PJ_SUCCESS;//stream->ca_cb (user_data, &frame);
 	if (result != PJ_SUCCESS || stream->quit)
 	    break;
 
@@ -702,8 +721,10 @@ printf("hyq[%s:%d] tmp_period_size=%d\n", __FUNCTION__, __LINE__, tmp_period_siz
 	tmp_buf_size = (rate / 1000) * param->output_latency_ms;
     else
 	tmp_buf_size = (rate / 1000) * PJMEDIA_SND_DEFAULT_PLAY_LATENCY;
+printf("hyq[%s:%d] tmp_buffer_size=%d\n", __FUNCTION__, __LINE__, tmp_buf_size);	
     snd_pcm_hw_params_set_buffer_size_near (stream->pb_pcm, params,
 					    &tmp_buf_size);
+printf("hyq[%s:%d] tmp_buffer_size=%d\n", __FUNCTION__, __LINE__, tmp_buf_size);	
     stream->param.output_latency_ms = tmp_buf_size / (rate / 1000);
 
     /* Set our buffer */
@@ -811,8 +832,10 @@ static pj_status_t open_capture (struct alsa_stream* stream,
     TRACE_((THIS_FILE, "open_capture: set period size: %d",
 	    stream->ca_frames));
     tmp_period_size = stream->ca_frames;
+printf("hyq[%s:%d] tmp_period_size=%d\n", __FUNCTION__, __LINE__, tmp_period_size);	
     snd_pcm_hw_params_set_period_size_near (stream->ca_pcm, params,
 					    &tmp_period_size, NULL);
+printf("hyq[%s:%d] tmp_period_size=%d\n", __FUNCTION__, __LINE__, tmp_period_size);	
     stream->ca_frames = tmp_period_size > stream->ca_frames ? tmp_period_size : 
                                                               stream->ca_frames;
     TRACE_((THIS_FILE, "open_capture: period size set to: %d",
@@ -823,8 +846,10 @@ static pj_status_t open_capture (struct alsa_stream* stream,
 	tmp_buf_size = (rate / 1000) * param->input_latency_ms;
     else
 	tmp_buf_size = (rate / 1000) * PJMEDIA_SND_DEFAULT_REC_LATENCY;
+printf("hyq[%s:%d] tmp_buffer_size=%d\n", __FUNCTION__, __LINE__, tmp_buf_size);	
     snd_pcm_hw_params_set_buffer_size_near (stream->ca_pcm, params,
 					    &tmp_buf_size);
+printf("hyq[%s:%d] tmp_buffer_size=%d\n", __FUNCTION__, __LINE__, tmp_buf_size);	
     stream->param.input_latency_ms = tmp_buf_size / (rate / 1000);
 
     /* Set our buffer */
@@ -891,7 +916,7 @@ static pj_status_t alsa_factory_create_stream(pjmedia_aud_dev_factory *f,
 	    return status;
 	}
     }
-
+#if 0
     /* Init capture */
     if (param->dir & PJMEDIA_DIR_CAPTURE) {
 	status = open_capture (stream, param);
@@ -902,7 +927,7 @@ static pj_status_t alsa_factory_create_stream(pjmedia_aud_dev_factory *f,
 	    return status;
 	}
     }
-
+#endif
     *p_strm = &stream->base;
     return PJ_SUCCESS;
 }
@@ -1014,7 +1039,7 @@ static pj_status_t alsa_stream_start (pjmedia_aud_stream *s)
 	if (status != PJ_SUCCESS)
 	    return status;
     }
-
+#if 0
     if (stream->param.dir & PJMEDIA_DIR_CAPTURE) {
 	status = pj_thread_create (stream->pool,
 				   "alsasound_playback",
@@ -1030,7 +1055,7 @@ static pj_status_t alsa_stream_start (pjmedia_aud_stream *s)
 	    stream->pb_thread = NULL;
 	}
     }
-
+#endif
     return status;
 }
 

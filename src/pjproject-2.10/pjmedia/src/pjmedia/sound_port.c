@@ -84,8 +84,9 @@ static pj_status_t play_cb(void *user_data, pjmedia_frame *frame)
     port = snd_port->port;
     if (port == NULL)
 	goto no_frame;
-
+PJ_LOG (4,(THIS_FILE, "[%s:%d]begin sound port pb_cb",  __FUNCTION__, __LINE__));
     status = pjmedia_port_get_frame(port, frame);
+PJ_LOG (4,(THIS_FILE, "[%s:%d]after sound port pb_cb",  __FUNCTION__, __LINE__));
     if (status != PJ_SUCCESS)
 	goto no_frame;
 
@@ -103,15 +104,17 @@ static pj_status_t play_cb(void *user_data, pjmedia_frame *frame)
 	}
 	snd_port->ec_suspend_count = 0;
 	pjmedia_echo_playback(snd_port->ec_state, (pj_int16_t*)frame->buf);
+//PJ_LOG (4,(THIS_FILE, "[%s:%d]after sound port pb_cb",  __FUNCTION__, __LINE__));
     }
-
+//PJ_LOG (4,(THIS_FILE, "[%s:%d]after sound port pb_cb",  __FUNCTION__, __LINE__));
     /* Invoke preview callback */
     if (snd_port->on_play_frame)
 	(*snd_port->on_play_frame)(snd_port->user_data, frame);
-
+//PJ_LOG (4,(THIS_FILE, "[%s:%d]after sound port pb_cb",  __FUNCTION__, __LINE__));
     return PJ_SUCCESS;
 
 no_frame:
+//PJ_LOG (4,(THIS_FILE, "[%s:%d]after sound port pb_cb",  __FUNCTION__, __LINE__));
     frame->type = PJMEDIA_FRAME_TYPE_AUDIO;
     frame->size = required_size;
     pj_bzero(frame->buf, frame->size);
@@ -131,7 +134,7 @@ no_frame:
     /* Invoke preview callback */
     if (snd_port->on_play_frame)
 	(*snd_port->on_play_frame)(snd_port->user_data, frame);
-
+//PJ_LOG (4,(THIS_FILE, "[%s:%d]after sound port pb_cb",  __FUNCTION__, __LINE__));
     return PJ_SUCCESS;
 }
 
@@ -174,7 +177,7 @@ static pj_status_t play_cb_ext(void *user_data, pjmedia_frame *frame)
 {
     pjmedia_snd_port *snd_port = (pjmedia_snd_port*) user_data;
     pjmedia_port *port = snd_port->port;
-
+PJ_LOG (4,(THIS_FILE, "[%s:%d]begin sound port play_cb_ext",  __FUNCTION__, __LINE__));
     if (port == NULL) {
 	frame->type = PJMEDIA_FRAME_TYPE_NONE;
 	return PJ_SUCCESS;
@@ -185,7 +188,7 @@ static pj_status_t play_cb_ext(void *user_data, pjmedia_frame *frame)
     /* Invoke preview callback */
     if (snd_port->on_play_frame)
 	(*snd_port->on_play_frame)(snd_port->user_data, frame);
-
+PJ_LOG (4,(THIS_FILE, "[%s:%d]after sound port play_cb_ext",  __FUNCTION__, __LINE__));
     return PJ_SUCCESS;
 }
 

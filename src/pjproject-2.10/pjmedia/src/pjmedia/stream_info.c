@@ -158,8 +158,10 @@ static pj_status_t get_audio_codec_info_param(pjmedia_stream_info *si,
 	     */
 	    if (si->type == PJMEDIA_TYPE_AUDIO && rtpmap->param.slen) {
 		si->fmt.channel_cnt = (unsigned) pj_strtoul(&rtpmap->param);
+printf("[%s:%d] channel cnt=%d\n",  __FUNCTION__, __LINE__, si->fmt.channel_cnt);
 	    } else {
 		si->fmt.channel_cnt = 1;
+printf("[%s:%d] channel cnt=%d\n",  __FUNCTION__, __LINE__, si->fmt.channel_cnt);
 	    }
 
 	} else {

@@ -1488,7 +1488,7 @@ static pj_status_t get_frame(pjmedia_port *port,
 {
     pjmedia_vid_stream *stream = (pjmedia_vid_stream*) port->port_data.pdata;
     pjmedia_vid_channel *channel = stream->dec;
-
+printf("[%s:%d]get_frame\n",  __FUNCTION__, __LINE__);
     /* Return no frame is channel is paused */
     if (channel->paused) {
 	frame->type = PJMEDIA_FRAME_TYPE_NONE;

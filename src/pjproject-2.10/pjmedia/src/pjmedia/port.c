@@ -96,8 +96,12 @@ PJ_DEF(pj_status_t) pjmedia_port_get_frame( pjmedia_port *port,
 {
     PJ_ASSERT_RETURN(port && frame, PJ_EINVAL);
 
-    if (port->get_frame)
-	return port->get_frame(port, frame);
+    if (port->get_frame){
+PJ_LOG (4,(THIS_FILE, "[%s:%d]begin  port pb_cb=%p",  __FUNCTION__, __LINE__, port->get_frame));
+		pj_status_t status = port->get_frame(port, frame);
+PJ_LOG (4,(THIS_FILE, "[%s:%d]after  port pb_cb=%p",  __FUNCTION__, __LINE__, port->get_frame));
+		return status;
+	}
     else {
 	frame->type = PJMEDIA_FRAME_TYPE_NONE;
 	return PJ_EINVALIDOP;

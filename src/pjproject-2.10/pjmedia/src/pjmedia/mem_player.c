@@ -182,7 +182,7 @@ static pj_status_t mem_get_frame( pjmedia_port *this_port,
     struct mem_player *player;
     char *endpos;
     pj_size_t size_needed, size_written;
-
+    printf("[%s:%d]get_frame\n",  __FUNCTION__, __LINE__);
     PJ_ASSERT_RETURN(this_port->info.signature == SIGNATURE,
 		     PJ_EINVALIDOP);
 

@@ -135,7 +135,7 @@ static pj_status_t resample_put_frame(pjmedia_port *this_port,
 {
     struct resample_port *rport = (struct resample_port*) this_port;
     pjmedia_frame downstream_frame;
-
+printf("[%s:%d]get_frame\n",  __FUNCTION__, __LINE__);
     /* Return if we don't have downstream port. */
     if (rport->dn_port == NULL) {
 	return PJ_SUCCESS;
